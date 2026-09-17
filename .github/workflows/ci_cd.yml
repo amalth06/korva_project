@@ -26,7 +26,7 @@ jobs:
         with:
           scannerVersion: 6.2.0.4584
         env:
-         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }
+         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build:
     name: Build project
