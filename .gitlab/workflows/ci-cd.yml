@@ -1,0 +1,122 @@
+name: CI/CD Vue.js
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+permissions:
+  contents: read
+
+jobs:
+  vulnerability:
+    name: SAST - SonarQube
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Analyse SonarQube
+        uses: SonarSource/sonarqube-scan-action@55af4e8b2e82479da5933328048a0734e520b171
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+   build:
+    name: Build
+    runs-on: ubuntu-24.04
+    needs: vulnerability
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Build du projet
+        run: npm run build
+
+      - name: Sauvegarde du dossier dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: vue-dist
+          path: dist/
+
+
+ 
+  trivy:
+    name: SCA - Trivy
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Construction de l'image Docker
+        run: |
+          docker build -t vuejs-app:${{ github.sha }} .
+
+      - name: Analyse de l'image avec Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: vuejs-app:${{ github.sha }}
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+  deploy:
+    name: Déploiement
+    runs-on: ubuntu-24.04
+    needs: trivy
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Construction de l'image Docker
+        run: |
+          docker build -t vuejs-app:latest .
+
+      - name: Déploiement
+        run: |
+          docker run -d \
+            --name vuejs-app \
+            -p 8080:80 \
+            vuejs-app:latest
+
+      - name: Vérification
+        run: |
+          sleep 5
+          curl http://localhost:8080
+  zap:
+    name: DAST - OWASP ZAP
+    runs-on: ubuntu-24.04
+    needs: deploy
+
+    steps:
+      - name: Scan OWASP ZAP
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          target: 'http://localhost:8080'
+
+  report:
+    name: Envoi du rapport
+    runs-on: ubuntu-24.04
+    needs: [sonar, build, trivy, deploy, zap]
+    if: always()
+
+   
