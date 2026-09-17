@@ -111,9 +111,4 @@ jobs:
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: 'http://localhost:8080'
-  
-  report:
-    name: Envoi du rapport
-    runs-on: ubuntu-24.04
-    needs: [vulnerability-scan, build, trivy, deploy, zap]
-    if: always()
+
