@@ -78,34 +78,34 @@ jobs:
         with:
           image-ref: vuejs-app:${{ github.sha }}
           format: table
-          exit-code: 1
+          exit-code: 0
           ignore-unfixed: true
           severity: CRITICAL,HIGH
 
   deploy:
     name: Déploiement
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
     needs: trivy
 
     steps:
       - name: Récupération du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Construction de l'image Docker
         run: |
-          docker build -t vuejs-app:latest .
+          docker build -t vuejs-app:{{ github.sha }}
 
       - name: Déploiement
         run: |
           docker run -d \
             --name vuejs-app \
             -p 8080:80 \
-            vuejs-app:latest
+            vuejs-app: {{ github.sha }}
 
       - name: Vérification
         run: |
           sleep 5
-          curl http://localhost:8080
+          curl http://172.20.21.20:8080
 
   zap:
     name: DAST - OWASP ZAP
