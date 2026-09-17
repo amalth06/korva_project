@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   vulnerability-scan:
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
