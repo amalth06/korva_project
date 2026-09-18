@@ -103,7 +103,7 @@ jobs:
         run: |
           docker run -d \
             --name vuejs-app-prod \
-            -p 8080:3000 \
+            -p 8082:3000 \
             vuejs-app1:${{ github.sha }}
 
       - name: Vérification du deploiement
