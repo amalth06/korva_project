@@ -97,7 +97,7 @@ jobs:
 
       - name: Nettoyage de l'ancien conteneur
         run: |
-          docker rm -f vuejs-app-prod || true
+	  docker rm -f vuejs-app-prod || true
 	  docker rm -f vuejs-app-prod || true
           docker system prune -f --filter "label=stage=builder" || true
 
