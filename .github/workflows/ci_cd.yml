@@ -115,5 +115,46 @@ jobs:
       - name: Scan OWASP ZAP
         uses: zaproxy/action-baseline@v0.15.0
         with:
-          target: 'http://localhost:8080'
+          target: 'http://172.20.21.20:8080'
+          cmd_options: '-a'
+          fail_action: false
+          artifact_name: 'zap-report'
+
+      - name: Install wkhtmltopdf
+        run: sudo apt-get install -y wkhtmltopdf
+      - name: Convert ZAP report into PDF
+        run: wkhtmltopdf --enable-local-file-access report_html.html zap-report.pdf
+      - name: Publish the report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: zap-report-pdf
+          path: zap-report.pdf
+
+  notify:
+    runs-on: ubuntu-24.04
+    needs: zap
+    if: always()
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Download the ZAP report
+        uses: actions/download-artifact@v4
+        with:
+          name: zap-report-pdf
+          path: .
+
+      - name: Send email with reports.
+        uses: dawidd6/action-send-mail@67ce3558d613188179559c61d3565140cf389968
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "Security Report"
+          to: ${{ secrets.MAIL_TO }}
+          from: KORVA Deployment Team <${{ secrets.MAIL_FROM }}>
+          body: |
+            Hello Team, here is Amalth! Haha!
+          attachments: zap-report.pdf
 
