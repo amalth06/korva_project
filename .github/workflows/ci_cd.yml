@@ -93,14 +93,14 @@ jobs:
 
       - name: Construction de l'image Docker
         run: |
-          docker build -t vuejs-app:${{ github.sha }} .
+          docker build -t vuejs-app1:${{ github.sha }} .
 
       - name: Déploiement
         run: |
           docker run -d \
             --name vuejs-app \
             -p 8080:3000 \
-            vuejs-app:${{ github.sha }} .
+            vuejs-app:${{ github.sha }} 
 
       - name: Vérification du deploiement
         run: |
