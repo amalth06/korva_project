@@ -102,7 +102,7 @@ jobs:
             -p 8080:3000 \
             vuejs-app:${{ github.sha }} .
 
-      - name: Vérification
+      - name: Vérification du deploiement
         run: |
           sleep 5
           curl -f http://localhost:8080
