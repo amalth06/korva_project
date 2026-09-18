@@ -100,12 +100,12 @@ jobs:
           docker run -d \
             --name vuejs-app \
             -p 8080:3000 \
-            vuejs-app:${{ github.sha }} 
+            vuejs-app1:${{ github.sha }} 
 
       - name: Vérification du deploiement
         run: |
           sleep 5
-          curl -f http://localhost:8080
+          curl -f http://172.20.21.20:8080
 
   zap:
     name: DAST - OWASP ZAP
