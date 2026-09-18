@@ -1,6 +1,6 @@
 services:
 
-  # Application en production
+
   korva-vitrine:
     container_name: korva-vitrine
     build:

@@ -100,7 +100,7 @@ jobs:
           docker run -d \
             --name vuejs-app \
             -p 8080:80 \
-            vuejs-app: {{ github.sha }} .
+            vuejs-app: ${{ github.sha }} .
 
       - name: Vérification
         run: |
