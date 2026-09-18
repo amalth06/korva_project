@@ -98,7 +98,6 @@ jobs:
       - name: Déploiement
         run: |
           docker run -d \
-            --name vuejs-app \
             -p 8080:3000 \
             vuejs-app1:${{ github.sha }} 
 
